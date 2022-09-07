@@ -23,17 +23,17 @@ namespace myDatingApp_test
 
         UsersController testUser;
 
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            context = new DataContext(dbContextOptions);
-            context.Database.EnsureCreated();
+        //[OneTimeSetUp]
+        //public void Setup()
+        //{
+        //    context = new DataContext(dbContextOptions);
+        //    context.Database.EnsureCreated();
 
 
-            SeedDatabase();
+        //    SeedDatabase();
 
-            testUser =new UsersController(context);
-        }
+        //    testUser =new UsersController(context);
+        //}
 
 
         [OneTimeTearDown]
