@@ -28,17 +28,17 @@ builder.Services.AddDbContext<DataContext>(options =>
 
     builder.Services.AddCors((setup) => {
         setup.AddPolicy("Defaults", options => {
-            options.AllowAnyMethod().AllowAnyHeader().WithOrigins("https://localhost:4200");
+            options.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();//("https://localhost:4200");
         });
     });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => 
+    .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetConnectionString("TokenKey"))),
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("TokenKey").Value)),
             ValidateIssuer = false,
             ValidAudience = null,
 

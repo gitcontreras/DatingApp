@@ -7,10 +7,11 @@ using MyAngularApp.Data;
 using MyAngularApp.DTOs;
 using MyAngularApp.Entities;
 using MyAngularApp.Interfaces;
+using System.Security.Claims;
 
 namespace MyAngularApp.Controllers
 {
-   // [Authorize]
+    //[Authorize]
     public class UsersController : BaseApiController
     {
         private readonly IUserRepository _userRepository;
@@ -44,6 +45,28 @@ namespace MyAngularApp.Controllers
         {
             return await _userRepository.GetMemberAsync(username);
                     
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser(MemberUpdateDTO memberUpdateDTO)
+        {
+             var username = "Lisa";//User.FindFirst(ClaimTypes.Name)?.Value;
+             var user=await _userRepository.GetUserByNameAsync(username);
+
+            //_mapper.Map(memberUpdateDTO,User);
+
+            user.Introduction = memberUpdateDTO.Introduction;
+            user.LookingFor = memberUpdateDTO.LookingFor;
+            user.Interests = memberUpdateDTO.Interests;
+            user.City = memberUpdateDTO.City;
+            user.Country= memberUpdateDTO.Country;
+
+            _userRepository.Update(user);
+
+            if(await _userRepository.SaveAllAsync())
+                return NoContent();
+
+            return BadRequest("Failed to update user");
         }
     }
 }
