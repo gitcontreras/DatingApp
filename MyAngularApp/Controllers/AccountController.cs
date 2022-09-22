@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyAngularApp.Data;
 using MyAngularApp.DTOs;
@@ -13,8 +14,10 @@ namespace MyAngularApp.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
-        public AccountController(DataContext context,ITokenService tokenService)
+        private readonly IMapper _mapper;
+        public AccountController(DataContext context,ITokenService tokenService, IMapper mapper)
         {
+            _mapper = mapper;
             _context = context;
             _tokenService = tokenService;
         }
@@ -29,13 +32,16 @@ namespace MyAngularApp.Controllers
             {
                 return BadRequest("Username is taken");
             }
+            var user = _mapper.Map<AppUser>(registerDto);
 
             using var hmac = new HMACSHA512();
-            var user = new AppUser {
-                UserName = registerDto.UserName.ToLower(),
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key
-            };
+
+            user.UserName = registerDto.UserName.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+                user.PasswordSalt = hmac.Key;
+            user.Interests = "";
+            user.Introduction = "";
+            user.LookingFor = "";
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -44,8 +50,8 @@ namespace MyAngularApp.Controllers
             return new UserDto
             {
                 UserName = registerDto.UserName,
-                Token = _tokenService.CreateToken(user)
-            
+                Token = _tokenService.CreateToken(user),
+              KnownAs = user.KnownAs
             };
         }
 
@@ -73,7 +79,8 @@ namespace MyAngularApp.Controllers
             {
                 UserName = loginDto.UserName,
                 Token = _tokenService.CreateToken(user),
-                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
+                KnownAs = user.KnownAs
             };
         }
 
